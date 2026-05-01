@@ -2,7 +2,7 @@
 - name: Gather cluster info from ONTAP
   netapp.ontap.na_ontap_rest_info:
     gather_subset:
-      - cluster
+      - cluster/nodes
   register: cluster_info
 
 - name: Show raw cluster data (verbose only)
@@ -12,7 +12,9 @@
 
 - name: Set cluster_name fact
   ansible.builtin.set_fact:
-    cluster_name: "{{ cluster_info.ontap_info.cluster.name }}"
+    cluster_name: >-
+      {{ cluster_info.ontap_info['cluster/nodes'].records
+         | map(attribute='name') | first }}
 
 - name: Assert cluster name was returned
   ansible.builtin.assert:
@@ -20,9 +22,5 @@
       - cluster_name is defined
       - cluster_name | length > 0
     fail_msg: >-
-      ONTAP REST gather_subset=cluster did not return a cluster name. Check
-      the FSx management endpoint is reachable and credentials are valid.
-
-- name: Show cluster name
-  ansible.builtin.debug:
-    var: cluster_name
+      ONTAP REST gather_subset=cluster/nodes did not return a cluster name.
+      Check the FSx management endpoint is reachable and credentials are valid.

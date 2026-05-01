@@ -1,0 +1,30 @@
+---
+- name: Check existing CIFS server config
+  netapp.ontap.na_ontap_rest_info:
+    gather_subset:
+      - protocols/cifs/services
+  register: cifs_current
+
+- name: Fail loudly if CIFS server name is being changed
+  ansible.builtin.assert:
+    that:
+      - existing_name is none or existing_name == cifs_server_name
+    fail_msg: >-
+      CIFS server already exists as '{{ existing_name }}' on SVM '{{ vserver }}'
+      but config requests '{{ cifs_server_name }}'. Renames require manual AD
+      cleanup of the old computer object — see runbook before proceeding.
+  vars:
+    existing_name: >-
+      {{ cifs_current.ontap_info['protocols/cifs/services'].records
+         | selectattr('svm.name', 'equalto', vserver)
+         | map(attribute='name') | first | default(none) }}
+
+- name: Create CIFS server and join to Active Directory
+  netapp.ontap.na_ontap_cifs_server:
+    vserver: "{{ vserver }}"
+    name: "{{ cifs_server_name }}"
+    domain: "{{ cifs_domain }}"
+    ou: "{{ dc_ou }}"
+    admin_user_name: "{{ dc_admin_user_name }}"
+    admin_password: "{{ dc_admin_password }}"
+    encrypt_dc_connection: true

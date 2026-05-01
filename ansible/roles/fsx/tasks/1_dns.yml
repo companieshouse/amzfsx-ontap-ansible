@@ -1,0 +1,7 @@
+---
+- name: Configure DNS servers on the SVM
+  netapp.ontap.na_ontap_dns:
+    vserver: "{{ vserver }}"
+    domains: "{{ cifs_domain }}"
+    nameservers: "{{ dns_servers }}"
+    skip_validation: true

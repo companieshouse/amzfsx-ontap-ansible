@@ -1,0 +1,17 @@
+---
+- name: Configure domain tunnel for AD authentication
+  netapp.ontap.na_ontap_domain_tunnel:
+    state: present
+    vserver: "{{ vserver }}"
+
+- name: Create domain admin users with the fsxadmin role
+  netapp.ontap.na_ontap_user:
+    state: present
+    name: "{{ cifs_domain }}\\{{ item }}"
+    vserver: "{{ cluster_name }}"
+    applications: ssh
+    authentication_method: domain
+    role_name: fsxadmin
+  loop: "{{ fsx_domain_admins }}"
+  loop_control:
+    label: "{{ item }}"

@@ -1,0 +1,68 @@
+---
+- name: Validate Vault path extra-vars are set
+  ansible.builtin.assert:
+    that:
+      - lookup('vars', item, default='') | trim | length > 0
+    fail_msg: >-
+      '{{ item }}' must be set. In CI this is injected by the Concourse
+      task. For local runs, pass both extra-vars explicitly:
+      ansible-playbook
+      --extra-vars aws_profile=heritage-development-eu-west-2
+      --extra-vars fsx_name=nfs-fsx
+      playbook.yml
+  loop:
+    - aws_profile
+    - fsx_name
+  loop_control:
+    label: "{{ item }}"
+
+- name: Validate Vault AppRole auth env vars are present
+  ansible.builtin.assert:
+    that:
+      - lookup('env', item) | length > 0
+    fail_msg: >-
+      Environment variable '{{ item }}' is not set. Vault AppRole
+      authentication requires ANSIBLE_HASHI_VAULT_ADDR,
+      ANSIBLE_HASHI_VAULT_ROLE_ID, and ANSIBLE_HASHI_VAULT_SECRET_ID
+      to be exported.
+  loop:
+    - ANSIBLE_HASHI_VAULT_ADDR
+    - ANSIBLE_HASHI_VAULT_ROLE_ID
+    - ANSIBLE_HASHI_VAULT_SECRET_ID
+  loop_control:
+    label: "{{ item }}"
+
+- name: Retrieve FSx config bundle from Vault
+  ansible.builtin.set_fact:
+    _fsx_config: "{{ lookup('community.hashi_vault.vault_kv2_get', vault_base_path + '/config').secret }}"
+  no_log: true
+
+- name: Set config facts
+  ansible.builtin.set_fact:
+    netapp_hostname: "{{ _fsx_config.netapp_hostname }}"
+    cifs_server_name: "{{ _fsx_config.cifs_server_name }}"
+    dns_servers: "{{ _fsx_config.dns_servers | from_json }}"
+  no_log: true
+
+- name: Retrieve FSx credentials bundle from Vault
+  ansible.builtin.set_fact:
+    _fsx_credentials: "{{ lookup('community.hashi_vault.vault_kv2_get', vault_base_path + '/credentials').secret }}"
+  no_log: true
+
+- name: Set credential facts
+  ansible.builtin.set_fact:
+    netapp_username: "{{ _fsx_credentials.fsxadmin_username }}"
+    netapp_password: "{{ _fsx_credentials.fsxadmin_password }}"
+    dc_admin_user_name: "{{ _fsx_credentials.ad_join_username }}"
+    dc_admin_password: "{{ _fsx_credentials.ad_join_password }}"
+  no_log: true
+
+- name: Retrieve domain admins bundle from Vault
+  ansible.builtin.set_fact:
+    _fsx_admins: "{{ lookup('community.hashi_vault.vault_kv2_get', vault_base_path + '/admins').secret }}"
+  no_log: true
+
+- name: Set domain admins fact
+  ansible.builtin.set_fact:
+    fsx_domain_admins: "{{ _fsx_admins.domain_admins | from_json }}"
+  no_log: true

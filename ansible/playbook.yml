@@ -1,0 +1,18 @@
+---
+- name: Configure FSx for ONTAP file system
+  hosts: localhost
+  gather_facts: false
+
+  module_defaults:
+    group/netapp.ontap.netapp_ontap:
+      hostname: "{{ netapp_hostname }}"
+      username: "{{ netapp_username }}"
+      password: "{{ netapp_password }}"
+      https: true
+      validate_certs: false
+      use_rest: always
+
+  roles:
+    - role: vault
+      tags: [vault]
+    - role: fsx

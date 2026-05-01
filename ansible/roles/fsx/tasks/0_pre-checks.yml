@@ -1,45 +1,12 @@
 ---
-- name: Validate inputs required to locate the Vault bundle
+- name: Validate FSx config and credentials are populated
   ansible.builtin.assert:
     that:
       - lookup('vars', item, default='') | trim | length > 0
     fail_msg: >-
-      '{{ item }}' must be set. In CI this is injected by the Concourse
-      task. For local runs, pass both extra-vars explicitly:
-      ansible-playbook
-      --extra-vars aws_profile=heritage-development-eu-west-2
-      --extra-vars fsx_name=nfs-fsx
-      playbook.yml
-  loop:
-    - aws_profile
-    - fsx_name
-  loop_control:
-    label: "{{ item }}"
-
-- name: Validate Vault AppRole auth env vars are present
-  ansible.builtin.assert:
-    that:
-      - lookup('env', item) | length > 0
-    fail_msg: >-
-      Environment variable '{{ item }}' is not set. Vault AppRole
-      authentication requires ANSIBLE_HASHI_VAULT_ADDR,
-      ANSIBLE_HASHI_VAULT_ROLE_ID, and ANSIBLE_HASHI_VAULT_SECRET_ID
-      to be exported.
-  loop:
-    - ANSIBLE_HASHI_VAULT_ADDR
-    - ANSIBLE_HASHI_VAULT_ROLE_ID
-    - ANSIBLE_HASHI_VAULT_SECRET_ID
-  loop_control:
-    label: "{{ item }}"
-
-- name: Validate FSx config and credentials populated by the vault role
-  ansible.builtin.assert:
-    that:
-      - lookup('vars', item, default='') | trim | length > 0
-    fail_msg: >-
-      '{{ item }}' is not set. This should have been populated by the
-      vault role from {{ vault_base_path }}. Check the Vault bundle is
-      complete and the AppRole has read access.
+      '{{ item }}' is not set. In CI this is populated by the vault role
+      from {{ vault_base_path | default('the Vault bundle') }}. For local
+      runs, supply it via an extra-vars file (e.g. -e @local-secrets.yml).
   loop:
     - netapp_hostname
     - netapp_username
@@ -54,15 +21,16 @@
     label: "{{ item }}"
   no_log: true
 
-- name: Validate FSx list variables populated by the vault role
+- name: Validate FSx list variables are populated
   ansible.builtin.assert:
     that:
       - lookup('vars', item) is iterable
       - lookup('vars', item) | length > 0
     fail_msg: >-
-      '{{ item }}' is not set or empty. This should have been populated
-      by the vault role from {{ vault_base_path }}. Check the Vault
-      bundle stores this as a native list (not a JSON-encoded string).
+      '{{ item }}' is not set or empty. In CI this is populated by the
+      vault role from {{ vault_base_path | default('the Vault bundle') }}.
+      For local runs, supply it as a native YAML list in your extra-vars
+      file.
   loop:
     - dns_servers
     - fsx_domain_admins

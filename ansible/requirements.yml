@@ -5,7 +5,7 @@ collections:
   - name: amazon.aws
     version: "8.1.0"
   - name: netapp.ontap
-    version: "23.4.0"
+    version: "22.14.0" # latest supported by ansible 2.15.6
   - name: community.general
     version: "9.3.0"
   - name: community.hashi_vault

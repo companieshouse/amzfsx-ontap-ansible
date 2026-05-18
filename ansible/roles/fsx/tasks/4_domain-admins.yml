@@ -19,10 +19,13 @@
   ansible.builtin.set_fact:
     current_domain_admins: >-
       {{ security_logins.ontap_info['security/accounts'].records
-         | json_query("[?scope=='cluster' && contains(name, '\\')].name")
-         | map('regex_replace', '^.*\\\\', '')
+         | json_query("[?scope=='cluster'].name")
+         | select('search', backslash)
+         | map('regex_replace', '^[^' ~ backslash ~ ']+' ~ backslash, '')
          | map('lower')
          | list }}
+  vars:
+    backslash: "{{ '\\' }}"
 
 - name: Determine which admins to add and remove
   ansible.builtin.set_fact:

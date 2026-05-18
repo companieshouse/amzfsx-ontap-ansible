@@ -33,29 +33,26 @@
   ansible.builtin.debug:
     var: _step_scope
 
-- name: DEBUG 3 — after name-contains-backslash filter
+- name: DEBUG 3b — search for double backslash
   ansible.builtin.set_fact:
-    _step_backslash: >-
+    _step_double: >-
       {{ security_logins.ontap_info['security/accounts'].records
          | selectattr('scope', 'equalto', 'cluster')
-         | selectattr('name', 'search', '\\\\')
+         | selectattr('name', 'search', '\\\\\\\\')
          | map(attribute='name') | list }}
 
-- name: DEBUG 3 — show
+- name: DEBUG 3b — show
   ansible.builtin.debug:
-    var: _step_backslash
+    var: _step_double
 
-- name: DEBUG 4 — alternative backslash filter using contains
-  ansible.builtin.set_fact:
-    _step_alt: >-
+- name: DEBUG 4b — show raw name lengths and repr
+  ansible.builtin.debug:
+    msg: >-
       {{ security_logins.ontap_info['security/accounts'].records
          | selectattr('scope', 'equalto', 'cluster')
-         | selectattr('name', 'contains', '\\')
-         | map(attribute='name') | list }}
-
-- name: DEBUG 4 — show
-  ansible.builtin.debug:
-    var: _step_alt
+         | map(attribute='name')
+         | map('regex_findall', '.')
+         | list }}
 
 - name: DEBUG 5 — manual jinja loop (bypasses selectattr entirely)
   ansible.builtin.set_fact:

@@ -1,4 +1,17 @@
 ---
+- name: Get current CIFS security settings
+  netapp.ontap.na_ontap_rest_cli:
+    command: "vserver/cifs/security"
+    verb: GET
+    params:
+      vserver: "{{ vserver }}"
+      fields: "encryption_required_for_dc_connections"
+  register: cifs_security_current
+
+- name: Debug — show shape of GET response
+  ansible.builtin.debug:
+    var: cifs_security_current
+
 - name: Require encryption for SVM-to-DC connections
   netapp.ontap.na_ontap_rest_cli:
     command: "vserver/cifs/security"
@@ -7,6 +20,7 @@
       vserver: "{{ vserver }}"
     body:
       encryption_required_for_dc_connections: true
+  when: not (cifs_security_current.msg.records[0].encryption_required_for_dc_connections | bool)
 
 - name: Check existing CIFS server config
   netapp.ontap.na_ontap_rest_info:

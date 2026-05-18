@@ -4,7 +4,33 @@
     state: present
     vserver: "{{ vserver }}"
 
-- name: Create domain admin users with the fsxadmin role
+- name: Get current security login users
+  netapp.ontap.na_ontap_rest_info:
+    gather_subset:
+      - security/accounts
+    fields:
+      - name
+      - applications
+      - role
+  register: security_logins
+
+- name: Build set of currently-configured domain admins
+  ansible.builtin.set_fact:
+    current_domain_admins: >-
+      {{ security_logins.ontap_info['security/accounts'].records
+         | selectattr('name', 'match', '^' ~ (cifs_domain | regex_escape) ~ '\\\\')
+         | selectattr('applications', 'defined')
+         | selectattr('role.name', 'equalto', 'fsxadmin')
+         | map(attribute='name')
+         | map('regex_replace', '^' ~ (cifs_domain | regex_escape) ~ '\\\\', '')
+         | list }}
+
+- name: Determine which admins to add and remove
+  ansible.builtin.set_fact:
+    admins_to_add: "{{ fsx_domain_admins | difference(current_domain_admins) }}"
+    admins_to_remove: "{{ current_domain_admins | difference(fsx_domain_admins) }}"
+
+- name: Add new domain admin users
   netapp.ontap.na_ontap_user:
     state: present
     name: "{{ cifs_domain }}\\{{ item }}"
@@ -12,6 +38,17 @@
     applications: ssh
     authentication_method: domain
     role_name: fsxadmin
-  loop: "{{ fsx_domain_admins }}"
+  loop: "{{ admins_to_add }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Remove domain admin users no longer in the desired list
+  netapp.ontap.na_ontap_user:
+    state: absent
+    name: "{{ cifs_domain }}\\{{ item }}"
+    vserver: "{{ cluster_name }}"
+    applications: ssh
+    authentication_method: domain
+  loop: "{{ admins_to_remove }}"
   loop_control:
     label: "{{ item }}"

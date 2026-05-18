@@ -15,63 +15,12 @@
       - scope
   register: security_logins
 
-- name: DEBUG 1 — record count and all names
-  ansible.builtin.debug:
-    msg:
-      total_records: "{{ security_logins.ontap_info['security/accounts'].records | length }}"
-      all_names: "{{ security_logins.ontap_info['security/accounts'].records | map(attribute='name') | list }}"
-      all_scopes: "{{ security_logins.ontap_info['security/accounts'].records | map(attribute='scope') | list }}"
-
-- name: DEBUG 2 — after scope filter
-  ansible.builtin.set_fact:
-    _step_scope: >-
-      {{ security_logins.ontap_info['security/accounts'].records
-         | selectattr('scope', 'equalto', 'cluster')
-         | map(attribute='name') | list }}
-
-- name: DEBUG 2 — show
-  ansible.builtin.debug:
-    var: _step_scope
-
-- name: DEBUG 3b — search for double backslash
-  ansible.builtin.set_fact:
-    _step_double: >-
-      {{ security_logins.ontap_info['security/accounts'].records
-         | selectattr('scope', 'equalto', 'cluster')
-         | selectattr('name', 'search', '\\\\\\\\')
-         | map(attribute='name') | list }}
-
-- name: DEBUG 3b — show
-  ansible.builtin.debug:
-    var: _step_double
-
-- name: DEBUG 4b — show raw name lengths and repr
-  ansible.builtin.debug:
-    msg: >-
-      {{ security_logins.ontap_info['security/accounts'].records
-         | selectattr('scope', 'equalto', 'cluster')
-         | map(attribute='name')
-         | map('regex_findall', '.')
-         | list }}
-
-- name: DEBUG 5 — manual jinja loop (bypasses selectattr entirely)
-  ansible.builtin.set_fact:
-    _step_manual: >-
-      {{ security_logins.ontap_info['security/accounts'].records
-         | json_query("[?scope=='cluster' && contains(name, '\\')].name") }}
-
-- name: DEBUG 5 — show
-  ansible.builtin.debug:
-    var: _step_manual
-
 - name: Build set of currently-configured domain admins
   ansible.builtin.set_fact:
     current_domain_admins: >-
       {{ security_logins.ontap_info['security/accounts'].records
-         | selectattr('scope', 'equalto', 'cluster')
-         | selectattr('name', 'search', '\\\\')
-         | map(attribute='name')
-         | map('regex_replace', '^[^\\\\]+\\\\', '')
+         | json_query("[?scope=='cluster' && contains(name, '\\')].name")
+         | map('regex_replace', '^.*\\\\', '')
          | map('lower')
          | list }}
 

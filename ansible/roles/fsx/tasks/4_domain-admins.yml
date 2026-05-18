@@ -15,12 +15,6 @@
       - scope
   register: security_logins
 
-- name: Check backslash var
-  ansible.builtin.debug:
-    msg: "len={{ backslash | length }} value={{ backslash }}"
-  vars:
-    backslash: '{{ "\\" }}'
-
 - name: Build set of currently-configured domain admins
   ansible.builtin.set_fact:
     current_domain_admins: >-

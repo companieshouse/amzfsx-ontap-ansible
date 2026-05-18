@@ -1,4 +1,9 @@
 ---
+- name: Require encryption for SVM-to-DC connections
+  netapp.ontap.na_ontap_vserver_cifs_security:
+    vserver: "{{ vserver }}"
+    encryption_required_for_dc_connections: true
+
 - name: Check existing CIFS server config
   netapp.ontap.na_ontap_rest_info:
     gather_subset:

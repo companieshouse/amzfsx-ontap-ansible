@@ -12,23 +12,32 @@
       - name
       - applications
       - role
+      - scope
   register: security_logins
+
+- name: Debug raw security accounts (remove after verifying)
+  ansible.builtin.debug:
+    var: security_logins.ontap_info['security/accounts'].records
 
 - name: Build set of currently-configured domain admins
   ansible.builtin.set_fact:
     current_domain_admins: >-
       {{ security_logins.ontap_info['security/accounts'].records
-         | selectattr('name', 'match', '^' ~ (cifs_domain | regex_escape) ~ '\\\\')
-         | selectattr('applications', 'defined')
-         | selectattr('role.name', 'equalto', 'fsxadmin')
+         | selectattr('name', 'search', '\\\\')
+         | selectattr('role', 'defined')
          | map(attribute='name')
-         | map('regex_replace', '^' ~ (cifs_domain | regex_escape) ~ '\\\\', '')
+         | map('regex_replace', '^[^\\\\]+\\\\', '')
+         | map('lower')
          | list }}
 
 - name: Determine which admins to add and remove
   ansible.builtin.set_fact:
-    admins_to_add: "{{ fsx_domain_admins | difference(current_domain_admins) }}"
-    admins_to_remove: "{{ current_domain_admins | difference(fsx_domain_admins) }}"
+    admins_to_add: >-
+      {{ fsx_domain_admins | map('lower') | list
+         | difference(current_domain_admins) }}
+    admins_to_remove: >-
+      {{ current_domain_admins
+         | difference(fsx_domain_admins | map('lower') | list) }}
 
 - name: Debug users diff
   ansible.builtin.debug:

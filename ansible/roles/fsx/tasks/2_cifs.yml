@@ -8,10 +8,6 @@
       fields: "encryption_required_for_dc_connections"
   register: cifs_security_current
 
-- name: Debug — show shape of GET response
-  ansible.builtin.debug:
-    var: cifs_security_current
-
 - name: Require encryption for SVM-to-DC connections
   netapp.ontap.na_ontap_rest_cli:
     command: "vserver/cifs/security"

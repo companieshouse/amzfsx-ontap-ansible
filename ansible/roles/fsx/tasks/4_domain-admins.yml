@@ -30,6 +30,14 @@
     admins_to_add: "{{ fsx_domain_admins | difference(current_domain_admins) }}"
     admins_to_remove: "{{ current_domain_admins | difference(fsx_domain_admins) }}"
 
+- name: Debug users diff
+  ansible.builtin.debug:
+    msg:
+      current: "{{ current_domain_admins }}"
+      desired: "{{ fsx_domain_admins }}"
+      to_add: "{{ admins_to_add }}"
+      to_remove: "{{ admins_to_remove }}"
+
 - name: Add new domain admin users
   netapp.ontap.na_ontap_user:
     state: present

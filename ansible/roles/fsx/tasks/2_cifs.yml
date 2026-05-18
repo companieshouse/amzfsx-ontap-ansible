@@ -41,3 +41,4 @@
     admin_user_name: "{{ dc_admin_user_name }}"
     admin_password: "{{ dc_admin_password }}"
     encrypt_dc_connection: true
+    force: true

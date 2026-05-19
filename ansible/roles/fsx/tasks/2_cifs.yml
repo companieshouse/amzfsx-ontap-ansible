@@ -16,7 +16,9 @@
       vserver: "{{ vserver }}"
     body:
       encryption_required_for_dc_connections: true
-  when: not (cifs_security_current.msg.records[0].encryption_required_for_dc_connections | bool)
+  when: >-
+    cifs_security_current.msg.records | default([]) | length == 0
+    or not (cifs_security_current.msg.records[0].encryption_required_for_dc_connections | bool)
 
 - name: Check existing CIFS server config
   netapp.ontap.na_ontap_rest_info:
@@ -34,7 +36,7 @@
     fail_msg: >-
       CIFS server already exists as '{{ existing_name }}' on SVM '{{ vserver }}'
       but config requests '{{ cifs_server_name }}'. Renames require manual AD
-      cleanup of the old computer object — see runbook before proceeding.
+      cleanup of the old computer object. See runbook before proceeding.
   vars:
     _matching_servers: >-
       {{ cifs_current.ontap_info['protocols/cifs/services'].records

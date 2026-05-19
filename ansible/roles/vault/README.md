@@ -7,7 +7,7 @@ All Vault lookups use `no_log: true`.
 ## Requirements
 
 - Ansible `>= 2.15.6`
-- `community.hashi_vault` collection (installed automatically with the collection)
+- `community.hashi_vault` collection (in `requirements.yml`)
 - A HashiCorp Vault server reachable from the control node
 - An AppRole with read access to the paths under `vault_base_path`
 
@@ -18,7 +18,7 @@ Two extra-vars must be provided in order to build the `vault_base_path`:
 - `aws_profile`
 - `fsx_name`
 
-The path is then constructed as:
+The path is constructed in `defaults/main.yml` as:
 ```
 /applications/{{ aws_profile }}/amzfsx/{{ fsx_name }}
 ```
@@ -62,9 +62,9 @@ The role reads three KV2 secrets relative to `vault_base_path`:
 - hosts: localhost
   gather_facts: false
   roles:
-    - role: companieshouse.infrastructure.vault
+    - role: vault
       tags: [vault]
-    - role: companieshouse.infrastructure.fsx
+    - role: fsx
 ```
 
 If you're providing local variables (e.g. extra-vars, ansible-vault), then you can skip this role with `--skip-tags vault`

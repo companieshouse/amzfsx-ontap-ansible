@@ -22,16 +22,16 @@ argument_specs:
         description: fsxadmin password for the cluster.
       vserver:
         type: str
-        default: nfs_svm
-        description: Name of the storage VM to configure.
+        required: false
+        description: Name of the storage VM to configure. Defaulted to nfs_svm in defaults/main.yml.
       cifs_server_name:
         type: str
         required: true
         description: NetBIOS-style name for the CIFS computer object in AD.
       cifs_domain:
         type: str
-        default: companieshouse.local
-        description: Active Directory domain to join.
+        required: false
+        description: Active Directory domain to join. Defaulted in defaults/main.yml.
       dns_servers:
         type: list
         elements: str
@@ -48,8 +48,8 @@ argument_specs:
         description: Password for the AD join account.
       dc_ou:
         type: str
-        required: true
-        description: Distinguished name of the OU where the CIFS computer object lives.
+        required: false
+        description: Distinguished name of the OU where the CIFS computer object lives. Defaulted in defaults/main.yml.
       fsx_domain_admins:
         type: list
         elements: str

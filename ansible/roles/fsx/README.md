@@ -13,13 +13,13 @@ and domain admin user reconciliation.
 - Control node must reach the FSx management endpoint; the SVM must reach AD
 - AD account with rights to create computer objects in the target OU
 
-Collection dependencies (`community.hashi_vault`, `netapp.ontap`) install automatically with the collection.
+Collection dependencies (`community.hashi_vault`, `netapp.ontap`) are pulled in via `requirements.yml`.
 
 ## Variables
 
 Defined in [`meta/argument_specs.yml`](meta/argument_specs.yml). View with:
 ```
-ansible-doc -t role companieshouse.infrastructure.fsx
+ansible-doc -t role fsx
 ```
 
 Required:
@@ -40,8 +40,9 @@ Defaulted: `vserver` (`nfs_svm`), `cifs_domain` (`companieshouse.local`), `dc_ou
 - hosts: localhost
   gather_facts: false
   roles:
-    - role: companieshouse.infrastructure.vault
-    - role: companieshouse.infrastructure.fsx
+    - role: vault
+      tags: [vault]
+    - role: fsx
 ```
 
 Without the `vault` role, you need to supply variables yourself e.g. extra-vars, group_vars, ansible-vault. The fsx argument-spec validation will fail loudly if anything is missing.

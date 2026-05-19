@@ -37,7 +37,7 @@
       {{ current_domain_admins
          | difference(fsx_domain_admins | map('lower') | list) }}
 
-- name: Debug users diff
+- name: Show users diff
   ansible.builtin.debug:
     msg:
       current: "{{ current_domain_admins }}"

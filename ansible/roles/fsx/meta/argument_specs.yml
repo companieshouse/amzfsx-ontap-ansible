@@ -22,7 +22,6 @@ argument_specs:
         description: fsxadmin password for the cluster.
       vserver:
         type: str
-        required: true
         default: nfs_svm
         description: Name of the storage VM to configure.
       cifs_server_name:
@@ -31,7 +30,6 @@ argument_specs:
         description: NetBIOS-style name for the CIFS computer object in AD.
       cifs_domain:
         type: str
-        required: true
         default: companieshouse.local
         description: Active Directory domain to join.
       dns_servers:

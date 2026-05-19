@@ -19,7 +19,8 @@
   ansible.builtin.set_fact:
     current_domain_admins: >-
       {{ security_logins.ontap_info['security/accounts'].records
-         | json_query("[?scope=='cluster'].name")
+         | selectattr('scope', 'equalto', 'cluster')
+         | map(attribute='name')
          | select('search', backslash)
          | map('regex_replace', '^[^' ~ backslash ~ ']+' ~ backslash, '')
          | map('lower')

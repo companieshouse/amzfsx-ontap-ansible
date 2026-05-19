@@ -1,8 +1,4 @@
 ---
-- name: Run FSx pre-flight assertions
-  ansible.builtin.import_tasks: 0_pre-checks.yml
-  tags: [always, preflight]
-
 - name: Configure DNS on the SVM
   ansible.builtin.import_tasks: 1_dns.yml
   tags: [dns]

@@ -1,4 +1,0 @@
----
-cifs_domain: companieshouse.local
-dc_ou: "OU=MSS Tier0,OU=MMS Tier,OU=CH-Tier-Cloud,OU=CARDIFF,OU=CH,DC=CompaniesHouse,DC=local"
-vserver: nfs_svm

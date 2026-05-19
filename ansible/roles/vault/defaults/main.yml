@@ -1,9 +1,0 @@
----
-# Extra-vars (must be supplied by the caller):
-#   aws_profile - the AWS profile/account name, e.g. heritage-development-eu-west-2
-#   fsx_name    - the FSx filesystem name, e.g. nfs-fsx
-aws_profile: null
-fsx_name: null
-
-# Built from the two extra-vars above. Override only if your Vault layout differs.
-vault_base_path: "/applications/{{ aws_profile }}/amzfsx/{{ fsx_name }}"

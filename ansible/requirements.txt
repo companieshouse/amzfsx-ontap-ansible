@@ -1,5 +1,4 @@
 # Python packages
 
-jmespath
 netapp-lib
 requests # for local dev, this is already present in ci-ansible-molecule-container

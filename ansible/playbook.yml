@@ -1,0 +1,33 @@
+---
+- name: Configure FSx for ONTAP file system
+  hosts: localhost
+  gather_facts: false
+
+  module_defaults:
+    group/netapp.ontap.netapp_ontap:
+      hostname: "{{ storage_fsx_vault_netapp_hostname | default(omit) }}"
+      username: "{{ storage_fsx_vault_fsxadmin_username | default(omit) }}"
+      password: "{{ storage_fsx_vault_fsxadmin_password | default(omit) }}"
+      https: true
+      validate_certs: false
+      use_rest: always
+
+  roles:
+    - role: companieshouse.infrastructure.storage_fsx_vault
+      tags: [vault]
+      vars:
+        storage_fsx_vault_base_path: "/applications/{{ aws_profile }}/amzfsx/{{ fsx_name }}"
+
+    - role: companieshouse.infrastructure.storage_fsx_configure
+      vars:
+        storage_fsx_configure_netapp_hostname: "{{ storage_fsx_vault_netapp_hostname }}"
+        storage_fsx_configure_netapp_username: "{{ storage_fsx_vault_fsxadmin_username }}"
+        storage_fsx_configure_netapp_password: "{{ storage_fsx_vault_fsxadmin_password }}"
+        storage_fsx_configure_vserver: "{{ storage_fsx_vault_vserver }}"
+        storage_fsx_configure_cifs_server_name: "{{ storage_fsx_vault_cifs_server_name }}"
+        storage_fsx_configure_cifs_domain: "{{ storage_fsx_vault_cifs_domain }}"
+        storage_fsx_configure_dns_servers: "{{ storage_fsx_vault_dns_servers }}"
+        storage_fsx_configure_dc_admin_user_name: "{{ storage_fsx_vault_ad_join_username }}"
+        storage_fsx_configure_dc_admin_password: "{{ storage_fsx_vault_ad_join_password }}"
+        storage_fsx_configure_dc_ou: "{{ storage_fsx_vault_dc_ou }}"
+        storage_fsx_configure_domain_admins: "{{ storage_fsx_vault_domain_admins }}"

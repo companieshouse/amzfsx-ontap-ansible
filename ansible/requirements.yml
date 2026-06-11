@@ -1,14 +1,8 @@
 ---
 collections:
-  - name: companieshouse.general
-    version: "1.2.3"
-  - name: amazon.aws
-    version: "8.1.0"
   - name: netapp.ontap
     version: "22.14.0" # latest supported by ansible 2.15.6
   - name: community.hashi_vault
     version: ">=6.0.0,<7.0.0"
-  - name: ansible.posix
-    version: "1.6.2"
   - name: companieshouse.infrastructure
-    version: "1.0.0"
+    version: "1.0.1"

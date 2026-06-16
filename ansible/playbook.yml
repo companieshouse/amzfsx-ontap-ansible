@@ -16,7 +16,8 @@
     - role: companieshouse.infrastructure.storage_fsx_vault
       tags: [vault]
       vars:
-        storage_fsx_vault_base_path: "/applications/{{ aws_profile }}/amzfsx/{{ fsx_name }}"
+        storage_fsx_vault_base_path: "{{ aws_profile }}/amzfsx/{{ fsx_name }}"
+        storage_fsx_vault_engine_mount_point: "applications"
 
     - role: companieshouse.infrastructure.storage_fsx_configure
       vars:

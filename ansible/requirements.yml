@@ -7,4 +7,4 @@ collections:
   - name: community.general
     version: "<12.0.0"
   - name: companieshouse.infrastructure
-    version: "1.0.4"
+    version: "1.0.5"
